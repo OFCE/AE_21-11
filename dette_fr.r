@@ -116,12 +116,13 @@ gdette <- ggplot(HPDD |> filter(year>=1949))+
   geom_segment(aes(y=0, yend=1, x=ym("1949 01"), xend=ym("1949 01")), size=0.1, col="grey25")+
   geom_segment(aes(y=0, yend=1, x=ym("1977 01"), xend=ym("1977 01")), size=0.1, col="grey25")+
   annotate(geom="text", y=1, x=ym("1949 2"), label = "IMF historical public debt database", hjust=0, vjust = 0, size=1.5)+
-  geom_segment(aes(y=0, yend=0, x=ym("1978 01"), xend=ym("2020 12")), size=0.1, col="grey25")+
+  geom_segment(aes(y=0, yend=0, x=ym("1978 01"), xend=ym("2020 06")), size=0.1, col="grey25")+
   geom_segment(aes(y=0, yend=1, x=ym("1978 01"), xend=ym("1978 01")), size=0.1, col="grey25")+
-  geom_segment(aes(y=0, yend=1, x=ym("2020 12"), xend=ym("2020 12")), size=0.1, col="grey25")+
+  geom_segment(aes(y=0, yend=1, x=ym("2020 06"), xend=ym("2020 06")), size=0.1, col="grey25")+
   annotate(geom="text", y=1, x=ym("1978 2"), label = "CN 2020 INSEE", hjust=0, vjust = 0, size=1.5)+
-  scale_x_date(date_breaks = "10 years", date_labels = "%Y", limits=c(ym("1949 01"), ym("2021 12")))+
+  scale_x_date(breaks = ym(str_c(c(1949, seq(1960, 2010, 10), 2020), " 01")), date_labels = "%Y", limits=c(ym("1949 01"), ym("2021 12")))+
   labs(title="Dette publique en % du PIB")
+
 gtaux <- ggplot(taux |> filter(y>=1949))+
   geom_step(data=~filter(.x, y>= 1987), aes(x=time, y=r10ans), col="dodgerblue1", direction="mid")+
   geom_step(data=~filter(.x, y<1987),aes(x=time, y=r_frig), col="dodgerblue4", direction="mid")+
@@ -132,43 +133,44 @@ gtaux <- ggplot(taux |> filter(y>=1949))+
   geom_segment(aes(y=0, yend=0, x=ym("1987 01"), xend=ym("2021 11")), size=0.1, col="grey25")+
   geom_segment(aes(y=0, yend=.1, x=ym("1987 01"), xend=ym("1987 01")), size=0.1, col="grey25")+
   geom_segment(aes(y=0, yend=.1, x=ym("2021 11"), xend=ym("2021 11")), size=0.1, col="grey25")+
-  annotate(geom="text", y=0.1, x=ym("1988 2"), label = "CN 2020 INSEE", hjust=0, vjust = 0, size=1.5)+
-  scale_x_date(date_breaks = "10 years", date_labels = "%Y", limits=c(ym("1949 01"), ym("2021 12")))+
+  annotate(geom="text", y=0.1, x=ym("1988 2"), label = "CN 2020 INSEE", hjust=0, vjust = 0, size=1.5)+ 
+  scale_x_date(breaks = ym(str_c(c(1949, seq(1960, 2010, 10), 2021), " 01")), date_labels = "%Y", limits=c(ym("1949 01"), ym("2021 12")))+
   labs(title="Taux souverain (10 ans, en %/an)")
+
 gcharge <- ggplot(interets)+
   geom_step(aes(x=time, y=100*verses), col="dodgerblue1", direction="mid")+
-  geom_segment(aes(y=0, yend=0, x=ym("1949 01"), xend=ym("2020 12")), size=0.1, col="grey25")+
+  geom_segment(aes(y=0, yend=0, x=ym("1949 01"), xend=ym("2020 06")), size=0.1, col="grey25")+
   geom_segment(aes(y=0, yend=0.05, x=ym("1949 01"), xend=ym("1949 01")), size=0.1, col="grey25")+
-  geom_segment(aes(y=0, yend=0.05, x=ym("2020 12"), xend=ym("2020 12")), size=0.1, col="grey25")+
+  geom_segment(aes(y=0, yend=0.05, x=ym("2020 06"), xend=ym("2020 06")), size=0.1, col="grey25")+
   annotate(geom="text", y=0.05, x=ym("1949 2"), label = "CN 2020 INSEE", hjust=0, vjust = 0, size=1.5)+
-  scale_x_date(date_breaks = "10 years", date_labels = "%Y", limits=c(ym("1949 01"), ym("2021 12")))+
+  scale_x_date(breaks = ym(str_c(c(1949, seq(1960, 2010, 10), 2020), " 01")), date_labels = "%Y", limits=c(ym("1949 01"), ym("2021 12")))+
   ylim(c(0,4))+
   labs(title="Charge d'intérêts en % du PIB")
 
-gecartc <- ggplot(HPDD |> filter(year>=1949))+
+(gecartc <- ggplot(HPDD |> filter(year>=1949))+
   geom_step(data=~filter(.x,year<1987),aes(x=time, y=100*ec), color="dodgerblue4", direction="mid")+
   geom_step(data=~filter(.x,year>=1987),aes(x=time, y=100*ec), color="dodgerblue1", direction="mid")+
   geom_col(aes(x=time, y=100*ec_p), fill="red", alpha=0.1, col=NA, width=years(1)/days(1),)+
   geom_col(aes(x=time, y=100*ec_m), fill="green", alpha=0.1, width=years(1)/days(1), col=NA)+
-  geom_segment(aes(y=0, yend=0, x=ym("1949 01"), xend=ym("1986 01")), size=0.1, col="grey25")+
-  geom_segment(aes(y=0, yend=0.1, x=ym("1949 01"), xend=ym("1949 01")), size=0.1, col="grey25")+
+  geom_segment(aes(y=0, yend=0, x=ym("1955 01"), xend=ym("1986 01")), size=0.1, col="grey25")+
+  geom_segment(aes(y=0, yend=0.1, x=ym("1955 01"), xend=ym("1955 01")), size=0.1, col="grey25")+
   geom_segment(aes(y=0, yend=0.1, x=ym("1986 01"), xend=ym("1986 01")), size=0.1, col="grey25")+
-  annotate(geom="text", y=0.1, x=ym("1949 2"), label = "CN 2020 INSEE et CGEDD J.Friggit", hjust=0, vjust = 0, size=1.5)+
+  annotate(geom="text", y=0.1, x=ym("1955 2"), label = "CN 2020 INSEE/CGEDD", hjust=0, vjust = 0, size=1.5)+
   geom_segment(aes(y=0, yend=0, x=ym("1987 01"), xend=ym("2020 01")), size=0.1, col="grey25")+
   geom_segment(aes(y=0, yend=.1, x=ym("1987 01"), xend=ym("1987 01")), size=0.1, col="grey25")+
   geom_segment(aes(y=0, yend=.1, x=ym("2020 01"), xend=ym("2020 01")), size=0.1, col="grey25")+
   annotate(geom="text", y=-0.1, x=ym("1988 2"), label = "CN 2020 INSEE", hjust=0, vjust = 1, size=1.5)+
-  scale_x_date(date_breaks = "10 years", date_labels = "%Y", limits=c(ym("1949 01"), ym("2021 12")))+
-  labs(title="r - g (en %/an)")
+  scale_x_date(breaks = ym(str_c(c(1955, seq(1960, 2010, 10), 2020), " 01")), date_labels = "%Y", limits=c(ym("1949 01"), ym("2021 12")))+
+  labs(title="r - g (en %/an)"))
 
 g_altereco <- (gdette + gtaux)/(gecartc+gcharge) +
-  plot_annotation(caption="Sources: INSEE, Banque de France, FMI, J. Friggit/CGEDD \n code @ github.com/OCFCE/AE_11-21") &
+  plot_annotation(caption="Sources: INSEE, Banque de France, FMI, J. Friggit/CGEDD \n code: github.com/OFCE/AE_11-21") &
   ylab("") & 
   xlab("") & 
   theme_minimal(base_family = "sans") &
   theme(plot.title = element_text(size=10, face = "plain", hjust = 0.5),
         plot.caption = element_text(size=7, face = "plain", hjust = 0),
-        axis.text =  element_text(size=7),
+        axis.text =  element_text(size=6),
         panel.grid.major = element_line(color="grey90", size=0.25),
         panel.grid.minor = element_line(color="grey90", size=0.25)) 
 ggsave(plot=g_altereco, filename="altereco.svg", width = 180, height = 180, units = "mm")
