@@ -7,6 +7,7 @@ library(ggplot2)
 library(plotly)
 library(lubridate)
 library(patchwork)
+library(slider)
 
 bdf <- read_delim(file="http://webstat.banque-france.fr/fr/downloadFile.do?id=5385691&exportType=csv", delim=";") |>
   clean_names() |> 
@@ -48,7 +49,8 @@ pib <- get_idbank_list("CNA-2014-PIB") |>
   select(year, pib) |> 
   arrange(year) |> 
   mutate(g = pib/lag(pib)-1,
-         g2 = (lag(pib)/lag(pib, 6))^(1/5)-1)
+         g_bck = (lag(pib)/lag(pib, 6))^(1/5)-1,
+         g_fwd = head(slide_dbl(c(pib, last(pib)*(1.03)^(1:9)), ~(last(.x)/first(.x))^(1/length(.x))-1, .after=9), -9))
 
 interets <- apu |> 
   filter(OPERATION %in%c("D41", "B9NF"), SECT_INST == "S13") |> 
@@ -58,7 +60,7 @@ interets <- apu |>
   left_join(pib, by="year") |> 
   mutate(interets = OBS_VALUE/pib,
          year = TIME_PERIOD) |> 
-  select(year, interets, pib, g, g2, IDBANK) |> 
+  select(year, interets, pib, g, g_bck, g_fwd, IDBANK) |> 
   mutate(type = case_when(
     IDBANK=="010563497" ~ "verses", 
     IDBANK=="010563498" ~ "recus",
@@ -83,7 +85,7 @@ dette <- 	ids |>
   pivot_wider(names_from = var, values_from = dette) |>
   rename(dette = DETTE, dette_nette = DETTENETTE, deficit = DEFICIT) |> 
   left_join(pib, by="year") |> 
-  mutate(dstar = g2/(1+g2)*dette/100,
+  mutate(dstar = g_bck/(1+g_bck)*dette/100,
          year = as.numeric(year),
          time = lubridate::ym(str_c(year, " 01")))
 
@@ -99,10 +101,10 @@ HPDD <- read_csv("HPDD_04-26-2020 18-59-27-12.csv") |>
   mutate(rapp2=verses*100/dette_IMF,
          rapp1=verses*100/dette,
          time = ym(str_c(year," 01")),
-         ec_app = if_else(year<1978, rapp2-g2, rapp1-g2),
+         ec_app = if_else(year<1978, rapp2-g_fwd, rapp1-g_fwd),
          ec_app_p = if_else(ec_app>=0, ec_app, NA_real_),
          ec_app_m  = if_else(ec_app<0, ec_app, NA_real_),
-         ec = r/100-g2,
+         ec = r/100-g_fwd,
          ec_p = if_else(ec>=0, ec, NA_real_),
          ec_m  = if_else(ec<0, ec, NA_real_)) 
 
@@ -152,15 +154,15 @@ gcharge <- ggplot(interets)+
   geom_step(data=~filter(.x,year>=1987),aes(x=time, y=100*ec), color="dodgerblue1", direction="mid")+
   geom_col(aes(x=time, y=100*ec_p), fill="red", alpha=0.1, col=NA, width=years(1)/days(1),)+
   geom_col(aes(x=time, y=100*ec_m), fill="green", alpha=0.1, width=years(1)/days(1), col=NA)+
-  geom_segment(aes(y=0, yend=0, x=ym("1955 01"), xend=ym("1986 01")), size=0.1, col="grey25")+
-  geom_segment(aes(y=0, yend=0.1, x=ym("1955 01"), xend=ym("1955 01")), size=0.1, col="grey25")+
+  geom_segment(aes(y=0, yend=0, x=ym("1949 01"), xend=ym("1986 01")), size=0.1, col="grey25")+
+  geom_segment(aes(y=0, yend=0.1, x=ym("1949 01"), xend=ym("1949 01")), size=0.1, col="grey25")+
   geom_segment(aes(y=0, yend=0.1, x=ym("1986 01"), xend=ym("1986 01")), size=0.1, col="grey25")+
-  annotate(geom="text", y=0.1, x=ym("1955 2"), label = "CN 2020 INSEE/CGEDD", hjust=0, vjust = 0, size=1.5)+
+  annotate(geom="text", y=0.1, x=ym("1949 2"), label = "CN 2020 INSEE/CGEDD", hjust=0, vjust = 0, size=1.5)+
   geom_segment(aes(y=0, yend=0, x=ym("1987 01"), xend=ym("2020 01")), size=0.1, col="grey25")+
   geom_segment(aes(y=0, yend=.1, x=ym("1987 01"), xend=ym("1987 01")), size=0.1, col="grey25")+
   geom_segment(aes(y=0, yend=.1, x=ym("2020 01"), xend=ym("2020 01")), size=0.1, col="grey25")+
   annotate(geom="text", y=-0.1, x=ym("1988 2"), label = "CN 2020 INSEE", hjust=0, vjust = 1, size=1.5)+
-  scale_x_date(breaks = ym(str_c(c(1955, seq(1960, 2010, 10), 2020), " 01")), date_labels = "%Y", limits=c(ym("1949 01"), ym("2021 12")))+
+  scale_x_date(breaks = ym(str_c(c(1949, seq(1960, 2010, 10), 2020), " 01")), date_labels = "%Y", limits=c(ym("1949 01"), ym("2021 12")))+
   labs(title="r - g (en %/an)"))
 
 g_altereco <- (gdette + gtaux)/(gecartc+gcharge) +
