@@ -71,12 +71,12 @@ oecd2 <- oecd_q %>%
   mutate(ca_ma = slide_dbl(CBGDPR, mean, .before=3),
          inv= slide_dbl(inv, mean, .before=3))
 
-so <-  "Source OECD EO#108"
+so <-  "Source OECD EO#109"
 colors <- c(EA17="darkorange2", USA="skyblue", GBR="olivedrab3")
 
 crises <- list(annotate("rect", xmin=yq("2008 Q1"), xmax=yq("2011 Q2"), ymin=-Inf, ymax=Inf, alpha=0.2, fill="gray"),
                annotate("rect", xmin=yq("2011 Q2"), xmax=yq("2013 Q4"), ymin=-Inf, ymax=Inf, alpha=0.1, fill="gray"),
-               annotate("rect", xmin=yq("2020 Q2"), xmax=yq("2021 Q2"), ymin=-Inf, ymax=Inf, alpha=0.2, fill="thistle"),
+               annotate("rect", xmin=yq("2020 Q2"), xmax=yq("2021 Q4"), ymin=-Inf, ymax=Inf, alpha=0.2, fill="thistle"),
                xlab(""),ylab(""), theme_minimal(), theme(text=element_text(size=5), plot.title = element_text(size=7)),
                scale_color_manual(values = colors))
 
@@ -86,27 +86,27 @@ crises.a <- list(annotate("rect", xmin=2008, xmax=2011, ymin=-Inf, ymax=Inf, alp
                xlab(""),ylab(""), theme_minimal(), theme(text=element_text(size=5), plot.title = element_text(size=7)),
                scale_color_manual(values = colors))
 
-unr <- ggplot(oecd2 %>% filter(between(date,yq("2007-Q1"),yq("2021-Q2"))),aes(x=date, y=UNR, col=pays))+
+unr <- ggplot(oecd2 %>% filter(between(date,yq("2007-Q1"),yq("2021-Q4"))),aes(x=date, y=UNR, col=pays))+
   geom_line(lwd=0.5)+geom_point(size=0.1)+
   crises+
   labs(title="Taux de chômage", caption=so)
 
-pib <- ggplot(oecd2 %>% filter(between(date,yq("2007-Q1"),yq("2021-Q2"))),aes(x=date, y=gdp_pc, col=pays))+
+pib <- ggplot(oecd2 %>% filter(between(date,yq("2007-Q1"),yq("2021-Q4"))),aes(x=date, y=gdp_pc, col=pays))+
   geom_path(lwd=0.5)+geom_point(size=0.1)+
   crises+
   labs(title="PIB par habitant (2007=1)", caption=so)
 
-inf <- ggplot(oecd2 %>% filter(between(date,yq("2007-Q1"),yq("2021-Q2"))),aes(x=date, y=core_inflation, col=pays))+
+inf <- ggplot(oecd2 %>% filter(between(date,yq("2007-Q1"),yq("2021-Q4"))),aes(x=date, y=core_inflation, col=pays))+
   geom_line(lwd=0.5)+geom_point(size=0.1)+
   theme_minimal()+
   crises+labs(title="Inflation sous-jacente", caption=str_c(so," glissement annuel"))
 
-ca <- ggplot(oecd2 %>% filter(between(date,yq("2007-Q1"),yq("2021-Q2"))),aes(x=date, y=ca_ma, col=pays))+
+ca <- ggplot(oecd2 %>% filter(between(date,yq("2007-Q1"),yq("2021-Q4"))),aes(x=date, y=ca_ma, col=pays))+
   geom_line(lwd=0.5)+geom_point(size=0.1)+
   theme_minimal()+
   crises+labs(title="Balance courante", caption=str_c(so," Moyenne mobile sur 4 trimestres"))
 
-inv <- ggplot(oecd2 %>% filter(between(date,yq("2007-Q1"),yq("2021-Q2"))),aes(x=date, y=inv, col=pays))+
+inv <- ggplot(oecd2 %>% filter(between(date,yq("2007-Q1"),yq("2021-Q4"))),aes(x=date, y=inv, col=pays))+
   geom_line(lwd=0.5)+geom_point(size=0.1)+
   theme_minimal()+
   crises+labs(title = "Investissement/PIB (2007=1)", caption=str_c(so," Moyenne mobile sur 4 trimestres"))
@@ -117,4 +117,4 @@ dette <- ggplot(oecd1 %>% filter(between(year,2007,2021)), aes(x=year, y=dette, 
   crises.a+labs(title="Dette publique (2007=0", caption=str_c(so, " Dette au sens de Maastricht pour EA et GBR"))
 
 gg <- (pib|unr)/(inf|inv)/(ca|dette)
-ggsave("macro eo108.svg", plot=gg, width=24, height=16, units="cm")
+ggsave("macro eo109.svg", plot=gg, width=24, height=16, units="cm")
